@@ -515,7 +515,7 @@ function Riepilogo({ storico, isEsame, onRicomincia, onHome }) {
 }
 
 // ── QUIZ ────────────────────────────────────────────────────
-function Quiz({ domande, isEsame, argomentoKey, onFine, onBack }) {
+function Quiz({ domande, isEsame, onFine, onBack }) {
   const [idx, setIdx] = useState(0)
   const [risposta, setRisposta] = useState(null)
   const [storico, setStorico] = useState([])
@@ -529,12 +529,17 @@ function Quiz({ domande, isEsame, argomentoKey, onFine, onBack }) {
 
   useEffect(() => {
     if (!isEsame || finito) return
-    if (secondi <= 0) { setFinito(true); return }
-    const t = setTimeout(() => setSecondi(s => s - 1), 1000)
+    if (secondi <= 0) return
+    const t = setTimeout(() => {
+      if (secondi <= 1) {
+        setSecondi(0)
+        setFinito(true)
+        return
+      }
+      setSecondi(s => s - 1)
+    }, 1000)
     return () => clearTimeout(t)
   }, [secondi, isEsame, finito])
-
-  useEffect(() => { setImgError(false) }, [idx])
 
   // Salva stats quando finisce
   useEffect(() => {
@@ -567,7 +572,7 @@ function Quiz({ domande, isEsame, argomentoKey, onFine, onBack }) {
     if (sessioni.length > 20) sessioni.splice(0, sessioni.length - 20)
     localStorage.setItem('patente_sessioni', JSON.stringify(sessioni))
     saveStats(stats)
-  }, [finito])
+  }, [finito, isEsame, storico])
 
 
 
@@ -576,8 +581,6 @@ function Quiz({ domande, isEsame, argomentoKey, onFine, onBack }) {
     setRisposta(scelta)
     setStorico(prev => [...prev, { domanda: d.q, risposta: scelta, corretta: d.a, argomento: d.argomento, spiegazione: d.spiegazione || '' }])
     setTimeout(() => bannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
-    if (scelta !== d.a) {
-    }
   }, [risposta, finito, d])
 
   const avanti = useCallback(() => {
@@ -618,7 +621,14 @@ function Quiz({ domande, isEsame, argomentoKey, onFine, onBack }) {
       <div className="flex-1 p-4 flex flex-col gap-4 max-w-2xl mx-auto w-full">
         {d.img && !imgError && (
           <div className="flex justify-center">
-            <img src={`${BASE_IMG}${d.img}`} alt="segnale" className="max-h-36 sm:max-h-48 object-contain rounded-xl" onError={() => setImgError(true)} />
+            <img
+              key={d.img}
+              src={`${BASE_IMG}${d.img}`}
+              alt="segnale"
+              className="max-h-36 sm:max-h-48 object-contain rounded-xl"
+              onLoad={() => setImgError(false)}
+              onError={() => setImgError(true)}
+            />
           </div>
         )}
         <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm">
@@ -674,7 +684,6 @@ export default function App() {
   const [schermata, setSchermata] = useState(primaVolta ? 'benvenuto' : 'home')
   const [domande, setDomande] = useState([])
   const [isEsame, setIsEsame] = useState(false)
-  const [argomentoKey, setArgomentoKey] = useState(null)
 
   const avviaEsame = () => {
     // Pesca domande bilanciate da tutti gli argomenti
@@ -688,7 +697,6 @@ export default function App() {
     })
     setDomande(shuffle(domandeBilanciate).slice(0, 30))
     setIsEsame(true)
-    setArgomentoKey(null)
     setSchermata('quiz')
   }
 
@@ -697,7 +705,6 @@ export default function App() {
     for (const dom of Object.values(datiGrezzi[key])) d.push(...dom.map(item => ({ ...item, argomento: key })))
     setDomande(shuffle(d))
     setIsEsame(false)
-    setArgomentoKey(key)
     setSchermata('quiz')
   }
 
@@ -710,7 +717,6 @@ export default function App() {
     <Quiz
       domande={domande}
       isEsame={isEsame}
-      argomentoKey={argomentoKey}
       onBack={() => setSchermata('home')}
       onFine={(home) => {
         if (home) setSchermata('home')
