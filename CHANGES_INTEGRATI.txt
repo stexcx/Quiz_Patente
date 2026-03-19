@@ -1,0 +1,26 @@
+Aggiornamenti inclusi in questo zip
+
+1) Quiz e spiegazioni
+- Dataset originale app: 7139 domande
+- Nuovo totale dopo integrazione: 7380 domande
+- Spiegazioni presenti dopo integrazione: 1006
+- Spiegazioni integrate dal file quiz_patente.json sui quiz già esistenti quando la domanda coincideva in modo affidabile.
+- Nuove domande aggiunte dal file quiz_patente.json: 241
+
+2) Interfaccia
+- Grafico progressi lasciato con una sola linea.
+- Rimossa la parte a barre corrette/errori.
+- Aggiunta visualizzazione della spiegazione dopo la risposta.
+- Aggiunta spiegazione anche nel riepilogo finale.
+
+3) Fix progetto
+- Pulito il progetto da node_modules e package-lock per evitare zip enorme e dipendenze sporche.
+- Aggiornato package.json con versioni compatibili per Vite/Capacitor.
+- Tolte credenziali in chiaro da android/app/build.gradle.
+- Aggiunto android/key.properties.example.
+- Impostato android/gradle.properties con Java 21.
+- Il keystore non è incluso nello zip.
+
+4) Note
+- Prima della build release crea android/key.properties partendo da android/key.properties.example.
+- Il keystore deve stare fuori dal progetto, ad esempio in ~/keystores/.

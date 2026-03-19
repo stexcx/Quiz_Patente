@@ -1,0 +1,4 @@
+storePassword=INSERISCI_LA_TUA_PASSWORD
+keyPassword=INSERISCI_LA_TUA_PASSWORD
+keyAlias=patentafacile
+storeFile=../../../keystores/patentafacile.keystore
